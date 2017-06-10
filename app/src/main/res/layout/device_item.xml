@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <android.support.v7.widget.CardView
+        android:id="@+id/card"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:elevation="4dp"
+        app:cardCornerRadius="10dp"
+        app:cardElevation="4dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="@drawable/card_info_header"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/textView17"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingEnd="4dp"
+                    android:paddingLeft="6dp"
+                    android:paddingRight="4dp"
+                    android:paddingStart="6dp"
+                    android:paddingTop="4dp"
+                    android:text="Номер"
+                    android:textColor="@color/white"
+                    android:textSize="12sp" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/textView_id"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:paddingBottom="4dp"
+                        android:paddingEnd="8dp"
+                        android:paddingLeft="8dp"
+                        android:paddingRight="8dp"
+                        android:paddingStart="8dp"
+                        android:paddingTop="4dp"
+                        android:text="4444"
+                        android:textColor="@color/white"
+                        android:textSize="20sp"
+                        android:textStyle="bold" />
+
+                    <ImageButton
+                        android:id="@+id/editDeviceButton"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="6"
+                        android:background="#d05ce3"
+                        app:srcCompat="@mipmap/ic_create_white_24dp" />
+
+                </LinearLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/textView18"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingEnd="4dp"
+                    android:paddingRight="4dp"
+                    android:paddingStart="4dp"
+                    android:paddingTop="4dp"
+                    android:text="Тип прибора"
+                    android:textSize="12sp" />
+
+                <TextView
+                    android:id="@+id/textView_name"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingBottom="4dp"
+                    android:paddingEnd="8dp"
+                    android:paddingLeft="8dp"
+                    android:paddingRight="8dp"
+                    android:paddingStart="8dp"
+                    android:paddingTop="4dp"
+                    android:text="Варта 1/832"
+                    android:textColor="@android:color/black"
+                    android:textSize="20sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/textView19"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingEnd="4dp"
+                    android:paddingLeft="4dp"
+                    android:paddingRight="4dp"
+                    android:paddingStart="4dp"
+                    android:paddingTop="4dp"
+                    android:text="Расположение"
+                    android:textSize="12sp" />
+
+                <TextView
+                    android:id="@+id/textView_location"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingBottom="4dp"
+                    android:paddingEnd="8dp"
+                    android:paddingLeft="8dp"
+                    android:paddingRight="8dp"
+                    android:paddingStart="8dp"
+                    android:paddingTop="4dp"
+                    android:text="РМЦ-2, АБК, жен баня 2 эт."
+                    android:textColor="@android:color/black"
+                    android:textSize="20sp" />
+            </LinearLayout>
+
+            <!--Divider-->
+            <!-- <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@android:color/darker_gray" />-->
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/textView20"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingEnd="4dp"
+                    android:paddingLeft="4dp"
+                    android:paddingRight="4dp"
+                    android:paddingStart="4dp"
+                    android:paddingTop="4dp"
+                    android:text="Номер телефона"
+                    android:textSize="12sp" />
+
+                <TextView
+                    android:id="@+id/textView_phone"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/card_info_footer"
+                    android:paddingBottom="4dp"
+                    android:paddingEnd="8dp"
+                    android:paddingLeft="8dp"
+                    android:paddingRight="8dp"
+                    android:paddingStart="8dp"
+                    android:paddingTop="4dp"
+                    android:text="0675417102"
+                    android:textColor="@android:color/black"
+                    android:textSize="20sp" />
+            </LinearLayout>
+
+        </LinearLayout>
+    </android.support.v7.widget.CardView>
+</LinearLayout>

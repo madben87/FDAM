@@ -1,0 +1,27 @@
+<resources>
+    <string name="app_name">FDAM_ver_0.2.0</string>
+
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+
+    <string name="action_settings">Settings</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+
+
+    <!--Error msg-->
+    <string name="err_empty_id">Please enter ID.</string>
+    <string name="err_incorrect_id">Incorrect field format. Enter the four-digit id.</string>
+    <string name="err_empty_name">Please enter your name.</string>
+    <string name="err_empty_location">Please enter device location.</string>
+    <string name="err_empty_description">Please enter a description of the work performed.</string>
+    <string name="err_empty_staff">Please select an attendant.</string>
+    <string name="err_empty_phone">Please enter a phone number.</string>
+    <string name="err_incorrect_phone">Incorrect phone number.</string>
+
+    <string name="err_empty_staff_name">Please enter name.</string>
+    <string name="err_empty_staff_last_name">Please enter last name.</string>
+    <string name="err_empty_staff_manager">Please enter manager name.</string>
+
+</resources>
