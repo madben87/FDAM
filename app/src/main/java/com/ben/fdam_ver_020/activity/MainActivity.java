@@ -20,6 +20,7 @@ import com.ben.fdam_ver_020.R;
 import com.ben.fdam_ver_020.bean.Device;
 import com.ben.fdam_ver_020.database.DeviceDaoImpl;
 import com.ben.fdam_ver_020.database.DBHelper;
+import com.ben.fdam_ver_020.database.SimDaoImpl;
 import com.ben.fdam_ver_020.fragment.DeviceListFragment;
 import com.ben.fdam_ver_020.fragment.StaffListFragment;
 import com.ben.fdam_ver_020.adapter.PagerAdapter;
@@ -55,19 +56,15 @@ public class MainActivity extends AppCompatActivity
 
         viewPager = (ViewPager) findViewById(R.id.view_pager);
 
-        //setSupportActionBar(toolbar);
-
         dbHelper = new DBHelper(this);
 
-        dbHelper.onCreate(dbHelper.getReadableDatabase());
+        //dbHelper.onCreate(dbHelper.getReadableDatabase());
 
-        /*dbHelper.onUpgrade(dbHelper.getReadableDatabase(), 1, 2);*/
+        //dbHelper.onUpgrade(dbHelper.getReadableDatabase(), 1, 2);
 
         initFab();
 
         initDrawer();
-
-        /*initData();*/
 
         initViewPager(viewPager);
 
@@ -114,7 +111,6 @@ public class MainActivity extends AppCompatActivity
         adapter = new PagerAdapter(getSupportFragmentManager());
         adapter.addFragment(new DeviceListFragment(), "Device");
         adapter.addFragment(new StaffListFragment(), "Staff");
-        //adapter.addFragment(new Test2(), "Test 2");
         viewPager.setAdapter(adapter);
     }
 
@@ -122,7 +118,7 @@ public class MainActivity extends AppCompatActivity
 
         try {
 
-            InputStream inputStream = getAssets().open("март.xls");
+            InputStream inputStream = getAssets().open("march.xls");
 
             list = Parser.readFromExcel(inputStream, getApplicationContext());
 
@@ -217,10 +213,6 @@ public class MainActivity extends AppCompatActivity
 
         if (id == R.id.nav_camera) {
             // Handle the camera action
-
-            /*for (Device elem : list) {
-                deviceDaoImpl.addDevice(elem);
-            }*/
 
         } else if (id == R.id.nav_gallery) {
 

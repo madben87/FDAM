@@ -13,11 +13,16 @@ import android.widget.Toast;
 import com.ben.fdam_ver_020.R;
 import com.ben.fdam_ver_020.bean.Description;
 import com.ben.fdam_ver_020.bean.Device;
+import com.ben.fdam_ver_020.bean.Sim;
+import com.ben.fdam_ver_020.bean.SimHistory;
 import com.ben.fdam_ver_020.database.DescriptionDaoImpl;
 import com.ben.fdam_ver_020.database.DeviceDaoImpl;
+import com.ben.fdam_ver_020.database.SimDaoImpl;
 import com.ben.fdam_ver_020.database.StaffDaoImpl;
 import com.ben.fdam_ver_020.dialog.AddDescriptionDialog;
 import com.ben.fdam_ver_020.dialog.DescriptionHistoryDialog;
+import com.ben.fdam_ver_020.dialog.SimHistoryDialog;
+import com.ben.fdam_ver_020.utils.MyUtils;
 
 import java.util.ArrayList;
 
@@ -41,9 +46,8 @@ public class InfoDeviceActivity extends AppCompatActivity implements View.OnClic
     private DeviceDaoImpl deviceDao = new DeviceDaoImpl(this);
     private StaffDaoImpl staffDao = new StaffDaoImpl(this);
     private DescriptionDaoImpl descriptionDao = new DescriptionDaoImpl(this);
+    private SimDaoImpl simDao = new SimDaoImpl(this);
     private DialogFragment add_dialog;
-
-    public static boolean CURRENT_DESCRIPTION;
 
     @Override
     protected void onResume() {
@@ -57,7 +61,6 @@ public class InfoDeviceActivity extends AppCompatActivity implements View.OnClic
         setContentView(R.layout.activity_device_detail);
 
         device = getIntent().getParcelableExtra("Device");
-        //description = descriptionDao.getDescription(device);
 
         initView(device);
 
@@ -76,7 +79,10 @@ public class InfoDeviceActivity extends AppCompatActivity implements View.OnClic
         switch (v.getId()) {
             case R.id.imageButton_info_delete:
 
-                deviceDao.deleteDevice(device);
+                deviceDao.deleteDevice(device.getId());
+
+                simDao.updateSimWithHistoryBiDeviceId(device);
+
                 Intent intentDelete = new Intent(v.getContext(), MainActivity.class);
                 intentDelete.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);//clear stack activity
                 v.getContext().startActivity(intentDelete);
@@ -100,13 +106,23 @@ public class InfoDeviceActivity extends AppCompatActivity implements View.OnClic
 
             case R.id.imageButton_info_phone_history:
 
+                Bundle bundleSim = new Bundle();
+                bundleSim.putInt("SimId", device.getSims().get(device.getSims().size()-1).getId_sim());
+                bundleSim.putInt("DeviceId", device.getDevice_id());
+
+                DialogFragment dialogSim = new SimHistoryDialog();
+
+                dialogSim.setArguments(bundleSim);
+
+                dialogSim.show(getFragmentManager(), "dialogSimHistory");
+
                 s = "Phone history";
                 break;
 
             case R.id.imageButton_info_desc_history:
 
                 Bundle bundle = new Bundle();
-                bundle.putInt("deviceId", device.getId());
+                bundle.putParcelable("device", device);
 
                 DialogFragment dialog = new DescriptionHistoryDialog();
 
@@ -119,11 +135,14 @@ public class InfoDeviceActivity extends AppCompatActivity implements View.OnClic
 
             case R.id.textView_info_staff:
 
-                Intent intentInfo = new Intent(v.getContext(), InfoStaffActivity.class);
-                intentInfo.putExtra("Staff", staffDao.getStaffById(device.getStaff_id()));
-                v.getContext().startActivity(intentInfo);
-
-                s = "Description history";
+                if (device.getStaff_id() != 0) {
+                    Intent intentInfo = new Intent(v.getContext(), InfoStaffActivity.class);
+                    intentInfo.putExtra("Staff", staffDao.getStaffById(device.getStaff_id()));
+                    v.getContext().startActivity(intentInfo);
+                    s = "Show staff";
+                }else {
+                    s = "No staff";
+                }
                 break;
 
             case R.id.imageButton_info_desc_add:
@@ -167,13 +186,20 @@ public class InfoDeviceActivity extends AppCompatActivity implements View.OnClic
         text_info_id.setText(String.valueOf(device.getDevice_id()));
         text_info_name.setText(device.getDevice_name());
         text_info_location.setText(device.getDevice_location());
-        text_info_phone.setText(device.getDevice_old_phone());
-        text_info_description.setText(/*descriptions.get(descriptions.size()-1).getDescription_item()*/lastDescription(device));
+
+        if (device.getSims().size() > 0) {
+            text_info_phone.setText(device.getSims().get(device.getSims().size()-1).getSim_num());
+        }else {
+            text_info_phone.setText("No sim");
+        }
+
+        text_info_description.setText(lastDescription(device));
 
         text_info_staff.setText(staffName(device.getStaff_id()));
         text_info_staff.setOnClickListener(this);
     }
 
+    // Return staff name if exist
     private String staffName(int position) {
 
         if (position != 0) {
@@ -188,6 +214,7 @@ public class InfoDeviceActivity extends AppCompatActivity implements View.OnClic
         return "No staff";
     }
 
+    // Return last description from device descriptions
     private String lastDescription(Device device) {
 
         ArrayList<Description> description;
@@ -202,10 +229,7 @@ public class InfoDeviceActivity extends AppCompatActivity implements View.OnClic
         return "No descriptions";
     }
 
-    private void reload() {
-        text_info_description.setText(lastDescription(device));
-    }
-
+    // Refresh description text field after add description
     @Override
     public void reloadDescription() {
         text_info_description.setText(lastDescription(device));

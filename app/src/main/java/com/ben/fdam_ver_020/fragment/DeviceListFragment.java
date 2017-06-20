@@ -39,7 +39,7 @@ public class DeviceListFragment extends Fragment {
 
         DeviceDaoImpl deviceDao = new DeviceDaoImpl(getActivity());
 
-        deviceResViewAdapter = new DeviceResViewAdapter(deviceDao.getDevices());
+        deviceResViewAdapter = new DeviceResViewAdapter(deviceDao.getDevicesWithSim());
 
         recyclerView.setHasFixedSize(true);
         linearLayoutManager = new LinearLayoutManager(getActivity());

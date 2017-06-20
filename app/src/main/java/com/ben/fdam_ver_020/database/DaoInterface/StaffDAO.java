@@ -15,4 +15,6 @@ public interface StaffDAO extends DAO {
     long updateStaff(Staff staff);
 
     Staff getStaffById(int id);
+
+    Staff getStaffByLastName(String name);
 }

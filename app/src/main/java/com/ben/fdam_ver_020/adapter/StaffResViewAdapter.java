@@ -84,10 +84,6 @@ public class StaffResViewAdapter extends RecyclerView.Adapter<StaffResViewAdapte
                 String s = data.get(position).getStaff_name() + " - " + data.get(position).getStaff_last_name();
                 Toast.makeText(view.getContext(), s, Toast.LENGTH_SHORT).show();
 
-                /*Intent intent = new Intent(view.getContext(), AddStaffActivity.class);
-                intent.putExtra("Staff", data.get(position));
-                view.getContext().startActivity(intent);*/
-
                 switch (view.getId()) {
                     case R.id.editStaffButton:
                         Intent intentEdit = new Intent(view.getContext(), AddStaffActivity.class);

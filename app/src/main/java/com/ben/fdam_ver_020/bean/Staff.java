@@ -86,4 +86,9 @@ public class Staff implements Parcelable {
             return new Staff[size];
         }
     };
+
+    @Override
+    public String toString() {
+        return staff_last_name;
+    }
 }

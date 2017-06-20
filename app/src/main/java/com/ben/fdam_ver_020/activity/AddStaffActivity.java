@@ -12,11 +12,9 @@ import android.view.WindowManager;
 import android.widget.EditText;
 
 import com.ben.fdam_ver_020.R;
-import com.ben.fdam_ver_020.bean.Device;
 import com.ben.fdam_ver_020.bean.Staff;
 import com.ben.fdam_ver_020.database.StaffDaoImpl;
-
-import java.util.ArrayList;
+import com.ben.fdam_ver_020.utils.MyUtils;
 
 public class AddStaffActivity extends AppCompatActivity {
 
@@ -94,12 +92,6 @@ public class AddStaffActivity extends AppCompatActivity {
                     staff = new Staff();
                 }
 
-                /*if (!validStaffName()) {
-                    return;
-                }else {
-                    staff.setStaff_name(text_staff_name.getText().toString());
-                }*/
-
                 staff.setStaff_name(text_staff_name.getText().toString());
 
                 if (!validStaffLastName()) {
@@ -111,14 +103,8 @@ public class AddStaffActivity extends AppCompatActivity {
                 if (!validStaffPhone()) {
                     return;
                 }else {
-                    staff.setStaff_phone(text_staff_phone.getText().toString().equals("") ? "no phone" : numParser(text_staff_phone.getText().toString()));
+                    staff.setStaff_phone(text_staff_phone.getText().toString().equals("") ? "no phone" : MyUtils.numFilter(text_staff_phone.getText().toString()));
                 }
-
-                /*if (!validStaffManager()) {
-                    return;
-                }else {
-                    staff.setStaff_manager(text_staff_manager.getText().toString());
-                }*/
 
                 staff.setStaff_manager(text_staff_manager.getText().toString());
 
@@ -157,18 +143,12 @@ public class AddStaffActivity extends AppCompatActivity {
         public void afterTextChanged(Editable s) {
 
             switch (view.getId()) {
-                /*case R.id.name_staff_text:
-                    validStaffName();
-                    break;*/
                 case R.id.lastName_staff_text:
                     validStaffLastName();
                     break;
                 case R.id.phone_staff_text:
                     validStaffPhone();
                     break;
-                /*case R.id.manager_staff_text:
-                    validStaffManager();
-                    break;*/
             }
         }
     }
@@ -202,11 +182,7 @@ public class AddStaffActivity extends AppCompatActivity {
             layout_staff_phone.setError(getString(R.string.err_incorrect_phone));
             requestFocus(text_staff_phone);
             return false;
-        }/*else if (text_staff_phone.getText().toString().trim().toCharArray().length < MIN_PHONE_LENGTH || text_staff_phone.getText().toString().trim().toCharArray().length > MAX_PHONE_LENGTH) {
-            layout_staff_phone.setError(getString(R.string.err_incorrect_phone));
-            requestFocus(text_staff_phone);
-            return false;
-        }*/else {
+        }else {
             layout_staff_phone.setErrorEnabled(false);
         }
 
@@ -229,20 +205,5 @@ public class AddStaffActivity extends AppCompatActivity {
         if (view.requestFocus()) {
             getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
         }
-    }
-
-    private String numParser(String string) {
-
-        StringBuilder out = new StringBuilder();
-
-        for (char elem : string.toCharArray()) {
-
-            if (Character.isDigit(elem)) {
-
-                out.append(elem);
-            }
-        }
-
-        return out.toString();
     }
 }

@@ -18,8 +18,8 @@ public class DBHelper extends SQLiteOpenHelper {
     public static final String COL_DEVICE_ID = "device_id";
     public static final String COL_DEVICE_NAME = "device_name";
     public static final String COL_DEVICE_LOCATION = "device_location";
-    public static final String COL_DEVICE_OLD_PHONE = "device_old_phone";
-    public static final String COL_DEVICE_NEW_PHONE = "device_new_phone";
+    //public static final String COL_DEVICE_OLD_PHONE = "device_old_phone";
+    //public static final String COL_DEVICE_NEW_PHONE = "device_new_phone";
 
     public static final String COL_STAFF_ID = "staff_id";
     public static final String COL_STAFF_NAME = "staff_name";
@@ -45,8 +45,6 @@ public class DBHelper extends SQLiteOpenHelper {
             + COL_DEVICE_NAME + " text not null, "
             + COL_DEVICE_LOCATION + " text not null, "
             + COL_STAFF_ID + " integer not null, "
-            + COL_DEVICE_OLD_PHONE + " integer, "
-            + COL_DEVICE_NEW_PHONE + " integer, "
             + "FOREIGN KEY(" + COL_STAFF_ID + ") REFERENCES " + TABLE_STAFF + "(" + COL_STAFF_ID + ")"
             + ");";
 
@@ -82,6 +80,7 @@ public class DBHelper extends SQLiteOpenHelper {
             + COL_SIM_ID + " integer not null, "
             + COL_SIM_INSTALL + " text, "
             + COL_SIM_UNINSTALL + " text, "
+            + COL_DEVICE_ID + " text not null, "
             + "FOREIGN KEY (" + COL_SIM_ID + ") REFERENCES " + TABLE_SIM + "(" + COL_SIM_ID + ")"
             + ");";
 

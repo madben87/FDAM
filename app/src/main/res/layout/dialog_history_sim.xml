@@ -20,7 +20,7 @@
             android:orientation="vertical">
 
             <android.support.v7.widget.RecyclerView
-                android:id="@+id/resView_history_description"
+                android:id="@+id/resView_history_sim"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
         </LinearLayout>

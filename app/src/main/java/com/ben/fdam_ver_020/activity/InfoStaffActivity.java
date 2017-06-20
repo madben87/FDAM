@@ -47,6 +47,7 @@ public class InfoStaffActivity extends AppCompatActivity implements View.OnClick
             case R.id.imageButton_info_staff_delete:
 
                 staffDao.deleteStaff(staff);
+
                 Intent intentDelete = new Intent(v.getContext(), MainActivity.class);
                 intentDelete.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);//clear stack activity
                 v.getContext().startActivity(intentDelete);
@@ -85,13 +86,9 @@ public class InfoStaffActivity extends AppCompatActivity implements View.OnClick
         view_info_staff_delete = (ImageButton) findViewById(R.id.imageButton_info_staff_delete);
         view_info_staff_description = (ImageButton) findViewById(R.id.imageButton_info_staff_description);
         view_info_staff_edit = (ImageButton) findViewById(R.id.imageButton_info_staff_edit);
-        //view_info_phone_history = (ImageButton) findViewById(R.id.imageButton_info_phone_history);
-        //view_info_description_history = (ImageButton) findViewById(R.id.imageButton_info_desc_history);
         view_info_staff_delete.setOnClickListener(this);
         view_info_staff_description.setOnClickListener(this);
         view_info_staff_edit.setOnClickListener(this);
-        //view_info_phone_history.setOnClickListener(this);
-        //view_info_description_history.setOnClickListener(this);
 
         text_info_staff_lastName.setText(String.valueOf(staff.getStaff_last_name()));
         text_info_staff_name.setText(staff.getStaff_name());

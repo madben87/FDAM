@@ -20,6 +20,8 @@
     <string name="err_empty_phone">Please enter a phone number.</string>
     <string name="err_incorrect_phone">Incorrect phone number.</string>
 
+    <string name="err_empty_date">Please enter current date.</string>
+
     <string name="err_empty_staff_name">Please enter name.</string>
     <string name="err_empty_staff_last_name">Please enter last name.</string>
     <string name="err_empty_staff_manager">Please enter manager name.</string>

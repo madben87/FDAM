@@ -23,6 +23,9 @@
         <activity android:name=".activity.AddStaffActivity" />
         <activity android:name=".activity.InfoDeviceActivity" />
         <activity android:name=".activity.InfoStaffActivity" />
+        <activity android:name=".activity.InfoDescriptionActivity" />
+        <activity android:name=".activity.AddDescriptionActivity" />
+        <activity android:name=".activity.InfoSimActivity"></activity>
     </application>
 
 </manifest>

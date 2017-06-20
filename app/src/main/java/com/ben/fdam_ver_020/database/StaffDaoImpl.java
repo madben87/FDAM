@@ -47,7 +47,6 @@ public class StaffDaoImpl implements StaffDAO {
 
         ContentValues contentValues = new ContentValues();
 
-        //contentValues.put(DBHelper.COL_STAFF_ID, staff.getStaff_id());
         contentValues.put(DBHelper.COL_STAFF_NAME, staff.getStaff_name());
         contentValues.put(DBHelper.COL_STAFF_LAST_NAME, staff.getStaff_last_name());
         contentValues.put(DBHelper.COL_STAFF_PHONE, staff.getStaff_phone());
@@ -63,7 +62,12 @@ public class StaffDaoImpl implements StaffDAO {
             open();
         }
 
-        long deleteId = sqLiteDatabase.delete(DBHelper.TABLE_STAFF, "staff_id = " + staff.getStaff_id(), null);
+        sqLiteDatabase.delete(DBHelper.TABLE_STAFF, "staff_id = " + staff.getStaff_id(), null);
+
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(DBHelper.COL_STAFF_ID, 0);
+
+        sqLiteDatabase.update(DBHelper.TABLE_DEVICE, contentValues, "staff_id = ?", new String[] {String.valueOf(staff.getStaff_id())});
     }
 
     public long updateStaff(Staff staff) {
@@ -90,6 +94,20 @@ public class StaffDaoImpl implements StaffDAO {
         }
 
         Cursor cursor = sqLiteDatabase.query(DBHelper.TABLE_STAFF, allStaffCol, "staff_id = ?", new String[] {String.valueOf(id)}, null, null, null);
+
+        cursor.moveToFirst();
+
+        return cursorToStaff(cursor);
+    }
+
+    @Override
+    public Staff getStaffByLastName(String name) {
+
+        if (sqLiteDatabase == null) {
+            open();
+        }
+
+        Cursor cursor = sqLiteDatabase.query(DBHelper.TABLE_STAFF, null, "staff_last_name = ?", new String[] {String.valueOf(name)}, null, null, null);
 
         cursor.moveToFirst();
 

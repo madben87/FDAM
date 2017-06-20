@@ -19,7 +19,7 @@ import java.util.List;
 
 public class DeviceResViewAdapter extends RecyclerView.Adapter<DeviceResViewAdapter.DeviceViewHolder> {
 
-    private List<Device> data;
+    private List<Device> devices;
 
     public static class DeviceViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
@@ -60,7 +60,7 @@ public class DeviceResViewAdapter extends RecyclerView.Adapter<DeviceResViewAdap
     }
 
     public DeviceResViewAdapter(List<Device> testList) {
-        this.data = testList;
+        this.devices = testList;
     }
 
     @Override
@@ -72,10 +72,15 @@ public class DeviceResViewAdapter extends RecyclerView.Adapter<DeviceResViewAdap
     @Override
     public void onBindViewHolder(final DeviceViewHolder holder, int position) {
 
-        holder.textView_id.setText(String.valueOf(data.get(position).getDevice_id()));
-        holder.textView_name.setText(data.get(position).getDevice_name());
-        holder.textView_location.setText(data.get(position).getDevice_location());
-        holder.textView_phone.setText(data.get(position).getDevice_new_phone().equals("") ? data.get(position).getDevice_old_phone() : data.get(position).getDevice_new_phone());
+        holder.textView_id.setText(String.valueOf(devices.get(position).getDevice_id()));
+        holder.textView_name.setText(devices.get(position).getDevice_name());
+        holder.textView_location.setText(devices.get(position).getDevice_location());
+
+        if (devices.get(position).getSims().size() > 0) {
+            holder.textView_phone.setText(devices.get(position).getSims().get(devices.get(position).getSims().size()-1).getSim_num());
+        }else {
+            holder.textView_phone.setText("No sim");
+        }
 
         holder.setOnItemClickListener(new ItemClick() {
             @Override
@@ -84,12 +89,12 @@ public class DeviceResViewAdapter extends RecyclerView.Adapter<DeviceResViewAdap
                 switch (view.getId()){
                     case R.id.editDeviceButton:
                         Intent intentEdit = new Intent(view.getContext(), AddDeviceActivity.class);
-                        intentEdit.putExtra("Device", data.get(position));
+                        intentEdit.putExtra("Device", devices.get(position));
                         view.getContext().startActivity(intentEdit);
                         break;
                     case R.id.card:
                         Intent intentInfo = new Intent(view.getContext(), InfoDeviceActivity.class);
-                        intentInfo.putExtra("Device", data.get(position));
+                        intentInfo.putExtra("Device", devices.get(position));
                         view.getContext().startActivity(intentInfo);
                 }
 
@@ -99,6 +104,6 @@ public class DeviceResViewAdapter extends RecyclerView.Adapter<DeviceResViewAdap
 
     @Override
     public int getItemCount() {
-        return data.size();
+        return devices.size();
     }
 }

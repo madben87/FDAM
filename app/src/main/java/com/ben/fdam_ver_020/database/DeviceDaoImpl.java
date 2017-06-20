@@ -6,17 +6,24 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
 import com.ben.fdam_ver_020.bean.Device;
+import com.ben.fdam_ver_020.bean.Sim;
 import com.ben.fdam_ver_020.database.DaoInterface.DeviceDAO;
+import com.ben.fdam_ver_020.utils.MyLog;
 
 import java.util.ArrayList;
 
 public class DeviceDaoImpl implements DeviceDAO {
 
+    private static final String LOG_TAG = "myLogs";
     private SQLiteDatabase sqLiteDatabase;
     private DBHelper dbHelper;
+    private Context context;
+    private SimDaoImpl simDao;
 
     public DeviceDaoImpl(Context context) {
         dbHelper = new DBHelper(context);
+        this.context = context;
+        simDao = new SimDaoImpl(context);
         //open();
     }
 
@@ -36,37 +43,46 @@ public class DeviceDaoImpl implements DeviceDAO {
         return sqLiteDatabase.isOpen();
     }
 
-    private String[] allDeviceCol = {DBHelper.COL_ID, DBHelper.COL_DEVICE_ID, DBHelper.COL_DEVICE_NAME, DBHelper.COL_DEVICE_LOCATION, DBHelper.COL_DEVICE_OLD_PHONE, DBHelper.COL_DEVICE_NEW_PHONE, DBHelper.COL_STAFF_ID};
+    private String[] allDeviceCol = {DBHelper.COL_ID, DBHelper.COL_DEVICE_ID, DBHelper.COL_DEVICE_NAME, DBHelper.COL_DEVICE_LOCATION, /*DBHelper.COL_DEVICE_OLD_PHONE, DBHelper.COL_DEVICE_NEW_PHONE,*/ DBHelper.COL_STAFF_ID};
 
-    public void addDevice(Device device) {
+    public long addDevice(Device device) {
 
         if (sqLiteDatabase == null) {
             open();
         }
 
-        ContentValues contentValues = new ContentValues();
-        //contentValues.put(DBHelper.COL_ID, device.getId());
-        contentValues.put(DBHelper.COL_DEVICE_ID, device.getDevice_id());
-        contentValues.put(DBHelper.COL_DEVICE_NAME, device.getDevice_name());
-        contentValues.put(DBHelper.COL_DEVICE_LOCATION, device.getDevice_location());
-        contentValues.put(DBHelper.COL_DEVICE_OLD_PHONE, device.getDevice_old_phone());
-        contentValues.put(DBHelper.COL_DEVICE_NEW_PHONE, device.getDevice_new_phone());
-        contentValues.put(DBHelper.COL_STAFF_ID, device.getStaff_id());
+        ContentValues contentValuesDevice = new ContentValues();
+        ContentValues contentValuesSim = new ContentValues();
 
-        long insertId = sqLiteDatabase.insert(DBHelper.TABLE_DEVICE, null, contentValues);
+        contentValuesDevice.put(DBHelper.COL_DEVICE_ID, device.getDevice_id());
+        contentValuesDevice.put(DBHelper.COL_DEVICE_NAME, device.getDevice_name());
+        contentValuesDevice.put(DBHelper.COL_DEVICE_LOCATION, device.getDevice_location());
+        contentValuesDevice.put(DBHelper.COL_STAFF_ID, device.getStaff_id());
+
+        long idDevice = sqLiteDatabase.insert(DBHelper.TABLE_DEVICE, null, contentValuesDevice);
+
+        if (device.getSims()!= null) {
+
+            for (Sim elem : device.getSims()) {
+                elem.setDevice_id((int) idDevice);
+                simDao.addSimWithHistoryFromParser(elem);
+            }
+        }
+
+        return idDevice;
     }
 
     @Override
-    public void deleteDevice(Device device) {
+    public long deleteDevice(int id) {
         if (sqLiteDatabase == null) {
             open();
         }
 
-        long deleteId = sqLiteDatabase.delete(DBHelper.TABLE_DEVICE, "id = " + device.getId(), null);
+        return sqLiteDatabase.delete(DBHelper.TABLE_DEVICE, "id = " + id, null);
     }
 
 
-    public void updateDevice(Device device) {
+    public long updateDevice(Device device) {
 
         if (sqLiteDatabase == null) {
             open();
@@ -77,11 +93,9 @@ public class DeviceDaoImpl implements DeviceDAO {
         contentValues.put(DBHelper.COL_DEVICE_ID, device.getDevice_id());
         contentValues.put(DBHelper.COL_DEVICE_NAME, device.getDevice_name());
         contentValues.put(DBHelper.COL_DEVICE_LOCATION, device.getDevice_location());
-        contentValues.put(DBHelper.COL_DEVICE_OLD_PHONE, device.getDevice_old_phone());
-        contentValues.put(DBHelper.COL_DEVICE_NEW_PHONE, device.getDevice_new_phone());
         contentValues.put(DBHelper.COL_STAFF_ID, device.getStaff_id());
 
-        long insertId = sqLiteDatabase.update(DBHelper.TABLE_DEVICE, contentValues, "id = ?", new String[] {String.valueOf(device.getId())});
+        return sqLiteDatabase.update(DBHelper.TABLE_DEVICE, contentValues, "id = ?", new String[] {String.valueOf(device.getId())});
     }
 
     public ArrayList<Device> getDevices() {
@@ -104,9 +118,67 @@ public class DeviceDaoImpl implements DeviceDAO {
             cursor.moveToNext();
         }
 
+        new MyLog("getDevice", cursor);
+
         cursor.close();
 
         return list;
+    }
+
+    public ArrayList<Device> getDevicesWithSim() {
+
+        if (sqLiteDatabase == null) {
+            open();
+        }
+
+        String queryDevicesWithSim = "select *, (select * from " + DBHelper.TABLE_SIM + " SIM inner join "
+                + DBHelper.TABLE_SIM_HISTORY + " SH where SIM.id = Device.id) from " + DBHelper.TABLE_DEVICE
+                + " Device inner join " + DBHelper.TABLE_SIM + " Sim where Device.id = ?";
+
+        ArrayList<Device> list = new ArrayList<>();
+
+        Cursor cursor;
+
+        cursor = sqLiteDatabase.query(DBHelper.TABLE_DEVICE, allDeviceCol, null, null, null, null, null);
+
+        cursor.moveToFirst();
+
+        while (!cursor.isAfterLast()) {
+
+            Device device = cursorToDevice(cursor);
+
+            try {
+                device.setSims(simDao.getSimListWithHistoryByDeviceId(device.getId()));
+            }catch (Exception e){e.printStackTrace();}
+
+            list.add(device);
+            cursor.moveToNext();
+        }
+
+        new MyLog("getDevice", cursor);
+
+        cursor.close();
+
+        return list;
+    }
+
+    public Device getDeviceById(int id) {
+
+        if (sqLiteDatabase == null) {
+            open();
+        }
+
+        String queryDeviceById = "select * from " + DBHelper.TABLE_DEVICE + " Device where Device.id = ?";
+
+        Cursor cursor = sqLiteDatabase.rawQuery(queryDeviceById, new String[]{String.valueOf(id)});
+
+        cursor.moveToFirst();
+
+        Device device = cursorToDevice(cursor);
+
+        cursor.close();
+
+        return device;
     }
 
     private Device cursorToDevice(Cursor cursor) {
@@ -117,8 +189,6 @@ public class DeviceDaoImpl implements DeviceDAO {
         device.setDevice_id(cursor.getInt(cursor.getColumnIndex(DBHelper.COL_DEVICE_ID)));
         device.setDevice_name(cursor.getString(cursor.getColumnIndex(DBHelper.COL_DEVICE_NAME)));
         device.setDevice_location(cursor.getString(cursor.getColumnIndex(DBHelper.COL_DEVICE_LOCATION)));
-        device.setDevice_old_phone(cursor.getString(cursor.getColumnIndex(DBHelper.COL_DEVICE_OLD_PHONE)));
-        device.setDevice_new_phone(cursor.getString(cursor.getColumnIndex(DBHelper.COL_DEVICE_NEW_PHONE)));
         device.setStaff_id(cursor.getInt(cursor.getColumnIndex(DBHelper.COL_STAFF_ID)));
 
         return device;

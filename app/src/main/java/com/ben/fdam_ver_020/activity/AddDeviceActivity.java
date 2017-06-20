@@ -15,16 +15,19 @@ import android.widget.Spinner;
 
 import com.ben.fdam_ver_020.R;
 import com.ben.fdam_ver_020.bean.Device;
+import com.ben.fdam_ver_020.bean.Sim;
+import com.ben.fdam_ver_020.bean.SimHistory;
 import com.ben.fdam_ver_020.bean.Staff;
 import com.ben.fdam_ver_020.database.DeviceDaoImpl;
 import com.ben.fdam_ver_020.database.StaffDaoImpl;
+import com.ben.fdam_ver_020.utils.MyUtils;
 
 import java.util.ArrayList;
 
 public class AddDeviceActivity extends AppCompatActivity {
 
-    private TextInputLayout layout_id, layout_name, layout_location, layout_description, layout_old_phone, layout_new_phone;
-    private EditText text_id, text_name, text_location, text_description, text_old_phone, text_new_phone;
+    private TextInputLayout layout_id, layout_name, layout_location, layout_description, layout_new_phone;
+    private EditText text_id, text_name, text_location, text_description, text_new_phone;
     private Spinner spinner_staff;
 
     private DeviceDaoImpl deviceDaoImpl = new DeviceDaoImpl(this);
@@ -36,6 +39,7 @@ public class AddDeviceActivity extends AppCompatActivity {
     public static final int MAX_PHONE_LENGTH = 11;
 
     private int spinner_staff_position;
+    private ArrayList<Staff> list;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,34 +63,18 @@ public class AddDeviceActivity extends AppCompatActivity {
         layout_name = (TextInputLayout) findViewById(R.id.name_layout_text);
         layout_location = (TextInputLayout) findViewById(R.id.location_layout_text);
         layout_description = (TextInputLayout) findViewById(R.id.description_layout_text);
-        layout_old_phone = (TextInputLayout) findViewById(R.id.old_phone_layout_text);
         layout_new_phone = (TextInputLayout) findViewById(R.id.new_phone_layout_text);
         text_id = (EditText) findViewById(R.id.id_text);
         text_name = (EditText) findViewById(R.id.name_text);
         text_location = (EditText) findViewById(R.id.location_text);
         text_description = (EditText) findViewById(R.id.description_text);
-        text_old_phone = (EditText) findViewById(R.id.old_phone_text);
         text_new_phone = (EditText) findViewById(R.id.new_phone_text);
 
         text_id.addTextChangedListener(new MyTextWatcher(text_id));
         text_name.addTextChangedListener(new MyTextWatcher(text_name));
         text_location.addTextChangedListener(new MyTextWatcher(text_location));
         text_description.addTextChangedListener(new MyTextWatcher(text_description));
-        text_old_phone.addTextChangedListener(new MyTextWatcher(text_old_phone));
         text_new_phone.addTextChangedListener(new MyTextWatcher(text_new_phone));
-
-        /*list = staffDao.getStaff();
-
-        ArrayList<String> name_list = new ArrayList<>();
-        for (Staff elem : list) {
-            name_list.add(elem.getStaff_last_name());
-        }*/
-
-        /*arrayAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, name_list);
-        arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-
-        spinner_staff = (Spinner) findViewById(R.id.spinner_staff);
-        spinner_staff.setAdapter(arrayAdapter);*/
     }
 
     private void initTextField(Device device) {
@@ -95,63 +83,54 @@ public class AddDeviceActivity extends AppCompatActivity {
         layout_name = (TextInputLayout) findViewById(R.id.name_layout_text);
         layout_location = (TextInputLayout) findViewById(R.id.location_layout_text);
         layout_description = (TextInputLayout) findViewById(R.id.description_layout_text);
-        layout_old_phone = (TextInputLayout) findViewById(R.id.old_phone_layout_text);
         layout_new_phone = (TextInputLayout) findViewById(R.id.new_phone_layout_text);
         text_id = (EditText) findViewById(R.id.id_text);
         text_name = (EditText) findViewById(R.id.name_text);
         text_location = (EditText) findViewById(R.id.location_text);
         text_description = (EditText) findViewById(R.id.description_text);
-        text_old_phone = (EditText) findViewById(R.id.old_phone_text);
         text_new_phone = (EditText) findViewById(R.id.new_phone_text);
 
         text_id.addTextChangedListener(new MyTextWatcher(text_id));
         text_name.addTextChangedListener(new MyTextWatcher(text_name));
         text_location.addTextChangedListener(new MyTextWatcher(text_location));
         text_description.addTextChangedListener(new MyTextWatcher(text_description));
-        text_old_phone.addTextChangedListener(new MyTextWatcher(text_old_phone));
         text_new_phone.addTextChangedListener(new MyTextWatcher(text_new_phone));
 
         text_id.setText(String.valueOf(device.getDevice_id()));
         text_name.setText(device.getDevice_name());
         text_location.setText(device.getDevice_location());
         text_description.setText("Test Description");
-        text_old_phone.setText(device.getDevice_old_phone());
-        text_new_phone.setText(device.getDevice_new_phone());
+
+        if (device.getSims().size() > 0) {
+            text_new_phone.setText(device.getSims().get(device.getSims().size()-1).getSim_num());
+        }else {
+            text_new_phone.setText("No sim");
+        }
 
         this.device = device;
-
-        /*list = staffDao.getStaff();
-
-        ArrayList<String> name_list = new ArrayList<>();
-
-        for (Staff elem : list) {
-            name_list.add(elem.getStaff_last_name());
-        }*/
-
-        /*arrayAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, name_list);
-        arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-
-        spinner_staff = (Spinner) findViewById(R.id.spinner_staff);
-        spinner_staff.setAdapter(arrayAdapter);*/
-
-        //spinner_staff.setSelection(device.getStaff_id());
-
-        spinner_staff_position = device.getStaff_id();
     }
 
     private void initSpinner() {
 
-        ArrayList<Staff> list = staffDao.getStaff();
+        Staff staffNull = new Staff();
+        staffNull.setStaff_last_name("Пусто");
 
-        ArrayList<String> name_list = new ArrayList<>();
+        list = new ArrayList<>();
 
-        name_list.add("Unknown");
+        list.add(staffNull);
 
-        for (Staff elem : list) {
-            name_list.add(elem.getStaff_last_name());
+        for (Staff elem : staffDao.getStaff()) {
+
+            list.add(elem);
+
+            if (device != null) {
+                if (elem.getStaff_id() == device.getStaff_id()) {
+                    spinner_staff_position = list.indexOf(elem);
+                }
+            }
         }
 
-        ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, name_list);
+        ArrayAdapter<Staff> arrayAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, list);
         arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
         spinner_staff = (Spinner) findViewById(R.id.spinner_staff);
@@ -188,25 +167,22 @@ public class AddDeviceActivity extends AppCompatActivity {
                     device.setDevice_location(text_location.getText().toString());
                 }
 
-                if (!validDescription()) {
-                    return;
-                }else {
-                    //device.s;
-                }
-
-                if (!validOldPhone()) {
-                    return;
-                }else {
-                    device.setDevice_old_phone(text_old_phone.getText().toString());
-                }
-
                 if (!validNewPhone()) {
                     return;
                 }else {
-                    device.setDevice_new_phone(text_new_phone.getText().toString());
+                    Sim sim = new Sim();
+                    sim.setSim_num(MyUtils.numFilter(text_new_phone.getText().toString()));
+
+                    SimHistory simHistory = new SimHistory();
+                    simHistory.setDate_install(MyUtils.currentDate());
+                    simHistory.setId_device(String.valueOf(device.getDevice_id()));
+
+                    sim.setSimHistories(MyUtils.toArrayList(simHistory));
+
+                    device.setSims(MyUtils.toArrayList(sim));
                 }
 
-                device.setStaff_id(spinner_staff.getSelectedItemPosition());
+                device.setStaff_id(list.get(spinner_staff.getSelectedItemPosition()).getStaff_id());
 
                 if (device.getId() == 0) {
                     deviceDaoImpl.addDevice(device);
@@ -254,9 +230,6 @@ public class AddDeviceActivity extends AppCompatActivity {
                     break;
                 case R.id.description_text:
                     validDescription();
-                    break;
-                case R.id.old_phone_text:
-                    validOldPhone();
                     break;
                 case R.id.new_phone_text:
                     validNewPhone();
@@ -317,28 +290,8 @@ public class AddDeviceActivity extends AppCompatActivity {
         return true;
     }
 
-    private boolean validOldPhone() {
-        if (text_old_phone.getText().toString().trim().isEmpty()) {
-            layout_old_phone.setError(getString(R.string.err_empty_phone));
-            requestFocus(text_old_phone);
-            return false;
-        }else if (text_old_phone.getText().toString().trim().toCharArray().length < MIN_PHONE_LENGTH || text_old_phone.getText().toString().trim().toCharArray().length > MAX_PHONE_LENGTH) {
-            layout_old_phone.setError(getString(R.string.err_incorrect_phone));
-            requestFocus(text_old_phone);
-            return false;
-        }else {
-            layout_old_phone.setErrorEnabled(false);
-        }
-
-        return true;
-    }
-
     private boolean validNewPhone() {
-        if (text_new_phone.getText().toString().trim().isEmpty()) {
-            layout_new_phone.setError(getString(R.string.err_empty_phone));
-            requestFocus(text_new_phone);
-            return false;
-        }else if (text_new_phone.getText().toString().trim().toCharArray().length < MIN_PHONE_LENGTH || text_new_phone.getText().toString().trim().toCharArray().length > MAX_PHONE_LENGTH) {
+        if (text_new_phone.getText().toString().trim().isEmpty() && text_new_phone.getText().toString().trim().toCharArray().length < MIN_PHONE_LENGTH || text_new_phone.getText().toString().trim().toCharArray().length > MAX_PHONE_LENGTH) {
             layout_new_phone.setError(getString(R.string.err_incorrect_phone));
             requestFocus(text_new_phone);
             return false;

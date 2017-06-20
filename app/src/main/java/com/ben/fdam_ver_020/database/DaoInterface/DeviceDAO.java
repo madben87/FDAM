@@ -8,9 +8,9 @@ public interface DeviceDAO extends DAO {
 
     ArrayList<Device> getDevices();
 
-    void addDevice(Device device);
+    long addDevice(Device device);
 
-    void deleteDevice(Device device);
+    long deleteDevice(int id);
 
-    void updateDevice(Device device);
+    long updateDevice(Device device);
 }

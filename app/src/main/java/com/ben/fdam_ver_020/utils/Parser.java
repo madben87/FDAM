@@ -1,8 +1,12 @@
 package com.ben.fdam_ver_020.utils;
 
 import android.content.Context;
+
 import com.ben.fdam_ver_020.bean.Device;
+import com.ben.fdam_ver_020.bean.Sim;
+import com.ben.fdam_ver_020.bean.SimHistory;
 import com.ben.fdam_ver_020.bean.Staff;
+import com.ben.fdam_ver_020.database.SimDaoImpl;
 import com.ben.fdam_ver_020.database.StaffDaoImpl;
 
 import org.apache.poi.hssf.usermodel.HSSFCell;
@@ -16,6 +20,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -36,12 +41,13 @@ public class Parser {
         Iterator iterator = myExcelSheet.rowIterator();
 
         StaffDaoImpl staffDao = new StaffDaoImpl(context);
+        SimDaoImpl simDao = new SimDaoImpl(context);
 
         while (iterator.hasNext()) {
 
             HSSFRow row = (HSSFRow) iterator.next();
 
-            Device bean = new Device();
+            Device device = new Device();
 
             try {
 
@@ -51,9 +57,9 @@ public class Parser {
 
                 }else {
 
-                    bean.setDevice_id((int) row.getCell(0).getNumericCellValue());
-                    bean.setDevice_name(row.getCell(1).getStringCellValue());
-                    bean.setDevice_location(row.getCell(2).getStringCellValue());
+                    device.setDevice_id((int) row.getCell(0).getNumericCellValue());
+                    device.setDevice_name(row.getCell(1).getStringCellValue());
+                    device.setDevice_location(row.getCell(2).getStringCellValue());
 
                     String staff_name = row.getCell(4).getStringCellValue();
 
@@ -69,7 +75,7 @@ public class Parser {
                             for (Staff e : staffs) {
                                 if (staff_name.equalsIgnoreCase(e.getStaff_last_name())) {
                                     staff_id = e.getStaff_id();
-                                    bean.setStaff_id((int) staff_id);
+                                    device.setStaff_id((int) staff_id);
                                     exist = true;
                                     break;
                                 }
@@ -83,7 +89,7 @@ public class Parser {
                                 staff.setStaff_manager("");
 
                                 staff_id = staffDao.addStaff(staff);
-                                bean.setStaff_id((int) staff_id);
+                                device.setStaff_id((int) staff_id);
                             }
 
                         }else {
@@ -94,17 +100,57 @@ public class Parser {
                             staff.setStaff_manager("");
 
                             staff_id = staffDao.addStaff(staff);
-                            bean.setStaff_id((int) staff_id);
+                            device.setStaff_id((int) staff_id);
                         }
 
                     }else {
-                        bean.setStaff_id(0);
+                        device.setStaff_id(0);
                     }
 
-                    bean.setDevice_old_phone(String.valueOf(row.getCell(5).getNumericCellValue()));
-                    bean.setDevice_new_phone(String.valueOf(row.getCell(6).getNumericCellValue()));
+                    String old_phone = String.valueOf((int) row.getCell(5).getNumericCellValue());
+                    String new_phone = String.valueOf((int) row.getCell(6).getNumericCellValue());
+                    String date = MyUtils.currentDate();
+                    ArrayList<Sim> simArrayList = new ArrayList<>();
 
-                    list.add(bean);
+                    if (!old_phone.equals("0")) {
+                        Sim sim = new Sim();
+                        SimHistory simHistory = new SimHistory();
+
+                        sim.setSim_num(old_phone);
+
+                        if (new_phone.equals("0")) {
+                            sim.setDevice_id(device.getId());
+                            simHistory.setDate_install(date);
+                            //simHistory.setDate_uninstall("");
+                        }else {
+                            sim.setDevice_id(0);
+                            simHistory.setDate_uninstall(date);
+                            //simHistory.setDate_install("");
+                        }
+
+                        simHistory.setId_device(String.valueOf(device.getDevice_id()));
+                        sim.setSimHistories(MyUtils.toArrayList(simHistory));
+                        simArrayList.add(sim);
+                    }
+
+                    if (!new_phone.equals("0")) {
+                        Sim sim = new Sim();
+
+                        sim.setSim_num(new_phone);
+                        sim.setDevice_id(device.getId());
+                        SimHistory simHistory = new SimHistory();
+                        simHistory.setId_device(String.valueOf(device.getDevice_id()));
+                        simHistory.setDate_install(date);
+                        //simHistory.setDate_uninstall("");
+                        ArrayList<SimHistory> simHistories = new ArrayList<>();
+                        simHistories.add(simHistory);
+                        sim.setSimHistories(simHistories);
+                        simArrayList.add(sim);
+                    }
+
+                    device.setSims(simArrayList);
+
+                    list.add(device);
                 }
 
             }catch (Exception e) {e.printStackTrace();}

@@ -4,7 +4,6 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import java.util.ArrayList;
-import java.util.Set;
 
 public class Device implements Parcelable {
 
@@ -12,18 +11,17 @@ public class Device implements Parcelable {
     private int device_id;
     private String device_name;
     private String device_location;
-    private String device_old_phone;
-    private String device_new_phone;
     private int staff_id;
+    private ArrayList<Sim> sims;
 
     public Device(Parcel in) {
         id = in.readInt();
         device_id = in.readInt();
         device_name = in.readString();
         device_location = in.readString();
-        device_old_phone = in.readString();
-        device_new_phone = in.readString();
         staff_id = in.readInt();
+        sims = new ArrayList<>();
+        in.readList(sims, getClass().getClassLoader());
     }
 
     public Device() {}
@@ -60,20 +58,12 @@ public class Device implements Parcelable {
         this.device_location = device_location;
     }
 
-    public String getDevice_old_phone() {
-        return device_old_phone;
+    public ArrayList<Sim> getSims() {
+        return sims;
     }
 
-    public void setDevice_old_phone(String device_old_phone) {
-        this.device_old_phone = device_old_phone;
-    }
-
-    public String getDevice_new_phone() {
-        return device_new_phone;
-    }
-
-    public void setDevice_new_phone(String device_new_phone) {
-        this.device_new_phone = device_new_phone;
+    public void setSims(ArrayList<Sim> sim) {
+        this.sims = sim;
     }
 
     public int getStaff_id() {
@@ -95,9 +85,8 @@ public class Device implements Parcelable {
         dest.writeInt(device_id);
         dest.writeString(device_name);
         dest.writeString(device_location);
-        dest.writeString(device_old_phone);
-        dest.writeString(device_new_phone);
         dest.writeInt(staff_id);
+        dest.writeList(sims);
     }
 
     public static final Creator<Device> CREATOR = new Creator<Device>() {

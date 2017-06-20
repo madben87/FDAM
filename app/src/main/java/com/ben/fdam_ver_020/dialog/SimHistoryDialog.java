@@ -11,25 +11,33 @@ import android.view.View;
 
 import com.ben.fdam_ver_020.R;
 import com.ben.fdam_ver_020.adapter.DescriptionHistoryAdapter;
-import com.ben.fdam_ver_020.bean.Device;
+import com.ben.fdam_ver_020.adapter.SimHistoryAdapter;
+import com.ben.fdam_ver_020.bean.Sim;
 import com.ben.fdam_ver_020.database.DescriptionDaoImpl;
+import com.ben.fdam_ver_020.database.SimDaoImpl;
 
-public class DescriptionHistoryDialog extends DialogFragment {
+import java.util.ArrayList;
+
+public class SimHistoryDialog extends DialogFragment {
 
     private View view;
     private RecyclerView recyclerView;
     private LinearLayoutManager linearLayoutManager;
-    private DescriptionHistoryAdapter descriptionHistoryAdapter;
+    private SimHistoryAdapter simHistoryAdapter;
     private int device_id;
+    //private int sim_id;
+    private SimDaoImpl simDao;
 
-    public DescriptionHistoryDialog(){}
+    public SimHistoryDialog() {}
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
 
+        simDao = new SimDaoImpl(getActivity());
+
         LayoutInflater inflater = getActivity().getLayoutInflater();
 
-        view = inflater.inflate(R.layout.dialog_history_description, null);
+        view = inflater.inflate(R.layout.dialog_history_sim, null);
 
         initView(view);
 
@@ -43,25 +51,24 @@ public class DescriptionHistoryDialog extends DialogFragment {
 
     private void initResView() {
 
-        DescriptionDaoImpl descriptionDao = new DescriptionDaoImpl(getActivity());
-
         Bundle bundle = this.getArguments();
         if (bundle != null) {
-            Device device = bundle.getParcelable("device");
-
-            device_id = device.getId();
+            device_id = bundle.getInt("DeviceId");
+            //sim_id = bundle.getInt("SimId");
         }
 
-        descriptionHistoryAdapter = new DescriptionHistoryAdapter(descriptionDao.getDescription(device_id));
+        ArrayList<Sim> list = simDao.getDeviceSimHistory(device_id);
+
+        simHistoryAdapter = new SimHistoryAdapter(list/*, device_id*/);
 
         recyclerView.setHasFixedSize(true);
         linearLayoutManager = new LinearLayoutManager(getActivity());
         recyclerView.setLayoutManager(linearLayoutManager);
-        recyclerView.setAdapter(descriptionHistoryAdapter);
+        recyclerView.setAdapter(simHistoryAdapter);
     }
 
     private void initView(View view) {
 
-        recyclerView = (RecyclerView) view.findViewById(R.id.resView_history_description);
+        recyclerView = (RecyclerView) view.findViewById(R.id.resView_history_sim);
     }
 }

@@ -1,5 +1,6 @@
 package com.ben.fdam_ver_020.adapter;
 
+import android.content.Intent;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -9,6 +10,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.ben.fdam_ver_020.R;
+import com.ben.fdam_ver_020.activity.AddDeviceActivity;
+import com.ben.fdam_ver_020.activity.InfoDescriptionActivity;
 import com.ben.fdam_ver_020.bean.Description;
 import com.ben.fdam_ver_020.utils.ItemClick;
 
@@ -70,6 +73,11 @@ public class DescriptionHistoryAdapter extends RecyclerView.Adapter<DescriptionH
 
                 switch (view.getId()) {
                     case R.id.card_history_description:
+
+                        Intent intent = new Intent(view.getContext(), InfoDescriptionActivity.class);
+                        intent.putExtra("Description", descriptions.get(position));
+                        view.getContext().startActivity(intent);
+
                         String s = descriptions.get(position).getDescription_date() + " - " + descriptions.get(position).getDescription_item();
                         Toast.makeText(view.getContext(), s, Toast.LENGTH_SHORT).show();
                         break;
