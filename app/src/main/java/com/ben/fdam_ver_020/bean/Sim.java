@@ -78,4 +78,9 @@ public class Sim implements Parcelable {
         dest.writeInt(device_id);
         dest.writeList(simHistories);
     }
+
+    @Override
+    public String toString() {
+        return sim_num;
+    }
 }

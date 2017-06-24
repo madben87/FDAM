@@ -64,8 +64,47 @@ public class DeviceDaoImpl implements DeviceDAO {
         if (device.getSims()!= null) {
 
             for (Sim elem : device.getSims()) {
-                elem.setDevice_id((int) idDevice);
+
+                if (elem.getDevice_id() >= 0) {
+                    elem.setDevice_id((int) idDevice);
+                }
+
                 simDao.addSimWithHistoryFromParser(elem);
+            }
+        }
+
+        return idDevice;
+    }
+
+    public long addDevice(Device device, boolean simIsExist) {
+
+        if (sqLiteDatabase == null) {
+            open();
+        }
+
+        ContentValues contentValuesDevice = new ContentValues();
+        //ContentValues contentValuesSim = new ContentValues();
+
+        contentValuesDevice.put(DBHelper.COL_DEVICE_ID, device.getDevice_id());
+        contentValuesDevice.put(DBHelper.COL_DEVICE_NAME, device.getDevice_name());
+        contentValuesDevice.put(DBHelper.COL_DEVICE_LOCATION, device.getDevice_location());
+        contentValuesDevice.put(DBHelper.COL_STAFF_ID, device.getStaff_id());
+
+        long idDevice = sqLiteDatabase.insert(DBHelper.TABLE_DEVICE, null, contentValuesDevice);
+
+        if (device.getSims()!= null) {
+
+            for (Sim elem : device.getSims()) {
+
+                if (simIsExist) {
+                    simDao.updateSimWithSimHistory(elem, (int) idDevice);
+                }else {
+                    elem.setDevice_id((int) idDevice);
+                    simDao.addSimWithHistoryFromParser(elem);
+                }
+
+                //elem.setDevice_id((int) idDevice);
+                //simDao.addSimWithHistoryFromParser(elem);
             }
         }
 
@@ -95,7 +134,54 @@ public class DeviceDaoImpl implements DeviceDAO {
         contentValues.put(DBHelper.COL_DEVICE_LOCATION, device.getDevice_location());
         contentValues.put(DBHelper.COL_STAFF_ID, device.getStaff_id());
 
-        return sqLiteDatabase.update(DBHelper.TABLE_DEVICE, contentValues, "id = ?", new String[] {String.valueOf(device.getId())});
+        long idDevice = sqLiteDatabase.update(DBHelper.TABLE_DEVICE, contentValues, "id = ?", new String[] {String.valueOf(device.getId())});
+
+        simDao.uninstallSimWithHistoryByDeviceId(device);
+
+        if (device.getSims()!= null) {
+
+            for (Sim elem : device.getSims()) {
+            //Sim sim = device.getSims().get(device.getSims().size()-1);
+            elem.setDevice_id(device.getId());
+            simDao.addSimWithHistoryFromParser(elem);
+            }
+        }
+
+        return idDevice;
+    }
+
+    public long updateDevice(Device device, boolean simIsExist) {
+
+        if (sqLiteDatabase == null) {
+            open();
+        }
+
+        ContentValues contentValues = new ContentValues();
+
+        contentValues.put(DBHelper.COL_DEVICE_ID, device.getDevice_id());
+        contentValues.put(DBHelper.COL_DEVICE_NAME, device.getDevice_name());
+        contentValues.put(DBHelper.COL_DEVICE_LOCATION, device.getDevice_location());
+        contentValues.put(DBHelper.COL_STAFF_ID, device.getStaff_id());
+
+        long idDevice = sqLiteDatabase.update(DBHelper.TABLE_DEVICE, contentValues, "id = ?", new String[] {String.valueOf(device.getId())});
+
+        simDao.uninstallSimWithHistoryByDeviceId(device);
+
+        if (device.getSims()!= null) {
+
+            for (Sim elem : device.getSims()) {
+                //Sim sim = device.getSims().get(device.getSims().size()-1);
+                elem.setDevice_id(device.getId());
+
+                if (!simIsExist) {
+                    simDao.addSimWithHistoryFromParser(elem);
+                }else {
+                    simDao.updateSimWithSimHistory(elem, device.getId());
+                }
+            }
+        }
+
+        return idDevice;
     }
 
     public ArrayList<Device> getDevices() {

@@ -29,7 +29,9 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="2"
+                    android:ellipsize="end"
                     android:padding="8dp"
+                    android:singleLine="true"
                     android:text="ID прибора :"
                     android:textColor="@color/white"
                     android:textSize="16sp" />
@@ -60,7 +62,9 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_weight="2"
+                        android:ellipsize="end"
                         android:padding="8dp"
+                        android:singleLine="true"
                         android:text="установлена :"
                         android:textSize="16sp" />
 
@@ -85,7 +89,9 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_weight="2"
+                        android:ellipsize="end"
                         android:padding="8dp"
+                        android:singleLine="true"
                         android:text="снята :"
                         android:textSize="16sp" />
 

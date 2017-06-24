@@ -116,14 +116,14 @@ public class Parser {
                         Sim sim = new Sim();
                         SimHistory simHistory = new SimHistory();
 
-                        sim.setSim_num(old_phone);
+                        sim.setSim_num(MyUtils.phoneFormatter(old_phone));
 
                         if (new_phone.equals("0")) {
                             sim.setDevice_id(device.getId());
                             simHistory.setDate_install(date);
                             //simHistory.setDate_uninstall("");
                         }else {
-                            sim.setDevice_id(0);
+                            sim.setDevice_id(-1);
                             simHistory.setDate_uninstall(date);
                             //simHistory.setDate_install("");
                         }
@@ -136,7 +136,7 @@ public class Parser {
                     if (!new_phone.equals("0")) {
                         Sim sim = new Sim();
 
-                        sim.setSim_num(new_phone);
+                        sim.setSim_num(MyUtils.phoneFormatter(new_phone));
                         sim.setDevice_id(device.getId());
                         SimHistory simHistory = new SimHistory();
                         simHistory.setId_device(String.valueOf(device.getDevice_id()));

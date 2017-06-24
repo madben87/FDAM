@@ -13,8 +13,6 @@ import android.widget.Toast;
 import com.ben.fdam_ver_020.R;
 import com.ben.fdam_ver_020.bean.Description;
 import com.ben.fdam_ver_020.bean.Device;
-import com.ben.fdam_ver_020.bean.Sim;
-import com.ben.fdam_ver_020.bean.SimHistory;
 import com.ben.fdam_ver_020.database.DescriptionDaoImpl;
 import com.ben.fdam_ver_020.database.DeviceDaoImpl;
 import com.ben.fdam_ver_020.database.SimDaoImpl;
@@ -22,7 +20,6 @@ import com.ben.fdam_ver_020.database.StaffDaoImpl;
 import com.ben.fdam_ver_020.dialog.AddDescriptionDialog;
 import com.ben.fdam_ver_020.dialog.DescriptionHistoryDialog;
 import com.ben.fdam_ver_020.dialog.SimHistoryDialog;
-import com.ben.fdam_ver_020.utils.MyUtils;
 
 import java.util.ArrayList;
 
@@ -81,7 +78,9 @@ public class InfoDeviceActivity extends AppCompatActivity implements View.OnClic
 
                 deviceDao.deleteDevice(device.getId());
 
-                simDao.updateSimWithHistoryBiDeviceId(device);
+                if (device.getSims().size() > 0) {
+                    simDao.uninstallSimWithHistoryByDeviceId(device);
+                }
 
                 Intent intentDelete = new Intent(v.getContext(), MainActivity.class);
                 intentDelete.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);//clear stack activity
@@ -107,7 +106,7 @@ public class InfoDeviceActivity extends AppCompatActivity implements View.OnClic
             case R.id.imageButton_info_phone_history:
 
                 Bundle bundleSim = new Bundle();
-                bundleSim.putInt("SimId", device.getSims().get(device.getSims().size()-1).getId_sim());
+                //bundleSim.putInt("SimId", device.getSims().get(device.getSims().size()-1).getId_sim());
                 bundleSim.putInt("DeviceId", device.getDevice_id());
 
                 DialogFragment dialogSim = new SimHistoryDialog();

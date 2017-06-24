@@ -48,7 +48,22 @@ public class SimDaoImpl implements SimDAO {
         if (sqLiteDatabase == null) {
             open();
         }
-        return null;
+
+        Cursor cursor = sqLiteDatabase.query(DBHelper.TABLE_SIM, null, null, null, null, null, null);
+
+        ArrayList<Sim> sims = new ArrayList<>();
+
+        cursor.moveToFirst();
+
+        while (!cursor.isAfterLast()) {
+            Sim sim = cursorToSim(cursor);
+            sims.add(sim);
+            cursor.moveToNext();
+        }
+
+        cursor.close();
+
+        return sims;
     }
 
     @Override
@@ -314,19 +329,18 @@ public class SimDaoImpl implements SimDAO {
     }
 
     @Override
-    public void updateSimWithHistoryBiDeviceId(Device device) {
+    public void uninstallSimWithHistoryByDeviceId(Device device) {
         if (sqLiteDatabase == null) {
             open();
         }
 
         Sim sim = getSimWithHistoryByDeviceId(device.getId());
 
-        sim.setDevice_id(0);
+        sim.setDevice_id(-1);
         ContentValues contentValuesSim = new ContentValues();
         contentValuesSim.put(DBHelper.COL_ID, sim.getDevice_id());
-        //contentValuesSim.put(DBHelper.COL_SIM_NUM, sim.getSim_num());
 
-        sqLiteDatabase.update(DBHelper.TABLE_SIM, contentValuesSim, "id = ?", new String[] {String.valueOf(sim.getId_sim())});
+        sqLiteDatabase.update(DBHelper.TABLE_SIM, contentValuesSim, "sim_id = ?", new String[]{String.valueOf(sim.getId_sim())});
 
         for (SimHistory elem : sim.getSimHistories()) {
 
@@ -342,9 +356,48 @@ public class SimDaoImpl implements SimDAO {
     }
 
     @Override
-    public void updateSim(Sim sim) {
+    public void installSimWithHistoryByDeviceId(Device device) {
         if (sqLiteDatabase == null) {
             open();
+        }
+
+        Sim sim = getSimWithHistoryByDeviceId(device.getId());
+
+        sim.setDevice_id(device.getId());
+        ContentValues contentValuesSim = new ContentValues();
+        contentValuesSim.put(DBHelper.COL_ID, sim.getDevice_id());
+
+        sqLiteDatabase.update(DBHelper.TABLE_SIM, contentValuesSim, "id = ?", new String[] {String.valueOf(sim.getId_sim())});
+
+        for (SimHistory elem : sim.getSimHistories()) {
+
+            if (elem.getId_device().equals(String.valueOf(device.getDevice_id()))) {
+                elem.setDate_install(MyUtils.currentDate());
+
+                ContentValues contentValuesSimHistory = new ContentValues();
+                contentValuesSimHistory.put(DBHelper.COL_SIM_INSTALL, elem.getDate_install());
+
+                sqLiteDatabase.update(DBHelper.TABLE_SIM_HISTORY, contentValuesSimHistory, "sim_history_id = ?", new String[] {String.valueOf(elem.getHistory_id())});
+            }
+        }
+    }
+
+    @Override
+    public void updateSimWithSimHistory(Sim sim, int id_device) {
+        if (sqLiteDatabase == null) {
+            open();
+        }
+
+        ContentValues contentValuesSim = new ContentValues();
+        contentValuesSim.put(DBHelper.COL_ID, id_device);
+        //contentValuesSim.put(DBHelper.COL_SIM_NUM, sim.getSim_num());
+        long simId = sqLiteDatabase.update(DBHelper.TABLE_SIM, contentValuesSim, "sim_id = ?", new String[]{String.valueOf(sim.getId_sim())});
+        for (SimHistory elem : sim.getSimHistories()) {
+            ContentValues contentValuesSimHistory = new ContentValues();
+            contentValuesSimHistory.put(DBHelper.COL_SIM_ID, simId);
+            contentValuesSimHistory.put(DBHelper.COL_SIM_INSTALL, MyUtils.currentDate());
+            contentValuesSimHistory.put(DBHelper.COL_DEVICE_ID, elem.getId_device());
+            sqLiteDatabase.insert(DBHelper.TABLE_SIM_HISTORY, null, contentValuesSimHistory);
         }
     }
 

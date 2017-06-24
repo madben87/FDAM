@@ -84,5 +84,9 @@ public class MyUtils {
         return arrayList;
     }
 
-
+    /*Format phone number to local format*/
+    public static String phoneFormatter(String num) {
+        //String s = num.replaceFirst("^0*", "");
+        return num.replaceFirst("^0*", "");
+    }
 }

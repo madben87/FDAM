@@ -1,17 +1,27 @@
 package com.ben.fdam_ver_020.activity;
 
+import android.content.Context;
 import android.content.Intent;
+import android.os.AsyncTask;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
+import android.widget.Filter;
+import android.widget.ListView;
 import android.widget.Spinner;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.ben.fdam_ver_020.R;
 import com.ben.fdam_ver_020.bean.Device;
@@ -19,24 +29,36 @@ import com.ben.fdam_ver_020.bean.Sim;
 import com.ben.fdam_ver_020.bean.SimHistory;
 import com.ben.fdam_ver_020.bean.Staff;
 import com.ben.fdam_ver_020.database.DeviceDaoImpl;
+import com.ben.fdam_ver_020.database.SimDaoImpl;
 import com.ben.fdam_ver_020.database.StaffDaoImpl;
+import com.ben.fdam_ver_020.utils.AppSettings;
 import com.ben.fdam_ver_020.utils.MyUtils;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
+
+import static com.ben.fdam_ver_020.R.id.autoComplete_SimNum;
 
 public class AddDeviceActivity extends AppCompatActivity {
 
     private TextInputLayout layout_id, layout_name, layout_location, layout_description, layout_new_phone;
-    private EditText text_id, text_name, text_location, text_description, text_new_phone;
+    private EditText text_id, text_name, text_location, text_description/*, text_new_phone*/;
     private Spinner spinner_staff;
+    private AutoCompleteTextView autoCompleteTextView;
+    //private TextView local_code;
+    //private ListView listView_autocomplete;
 
     private DeviceDaoImpl deviceDaoImpl = new DeviceDaoImpl(this);
     private StaffDaoImpl staffDao = new StaffDaoImpl(this);
+    private SimDaoImpl simDao = new SimDaoImpl(this);
     private Device device;
+    private ArrayList<Sim> sims;
+    private AsyncDao asyncDao;
 
     public static final int ID_LENGTH = 4;
     public static final int MIN_PHONE_LENGTH = 9;
-    public static final int MAX_PHONE_LENGTH = 11;
+    public static final int MAX_PHONE_LENGTH = 13;
 
     private int spinner_staff_position;
     private ArrayList<Staff> list;
@@ -45,6 +67,17 @@ public class AddDeviceActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_device);
+
+        asyncDao = new AsyncDao();
+        asyncDao.execute();
+
+        try {
+            sims = asyncDao.get();
+            Toast toast = Toast.makeText(getApplicationContext(), "Sims size " + sims.size(), Toast.LENGTH_SHORT);
+            toast.show();
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+        }
 
         if (Device.class.isInstance(getIntent().getParcelableExtra("Device"))) {
             initTextField((Device) getIntent().getParcelableExtra("Device"));
@@ -55,6 +88,21 @@ public class AddDeviceActivity extends AppCompatActivity {
         initSpinner();
 
         initFab();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        /*asyncDao = new AsyncDao();
+        asyncDao.execute();
+
+        try {
+            sims = asyncDao.get();
+            Toast toast = Toast.makeText(getApplicationContext(), "Sims size " + sims.size(), Toast.LENGTH_SHORT);
+            toast.show();
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+        }*/
     }
 
     private void initTextField() {
@@ -68,13 +116,22 @@ public class AddDeviceActivity extends AppCompatActivity {
         text_name = (EditText) findViewById(R.id.name_text);
         text_location = (EditText) findViewById(R.id.location_text);
         text_description = (EditText) findViewById(R.id.description_text);
-        text_new_phone = (EditText) findViewById(R.id.new_phone_text);
+        //text_new_phone = (EditText) findViewById(R.id.new_phone_text);
+        autoCompleteTextView = (AutoCompleteTextView) findViewById(autoComplete_SimNum);
+        //local_code = (TextView) findViewById(R.id.label_local_code);
+        //listView_autocomplete = (ListView) findViewById(R.id.listView_autocomplete);
 
         text_id.addTextChangedListener(new MyTextWatcher(text_id));
         text_name.addTextChangedListener(new MyTextWatcher(text_name));
         text_location.addTextChangedListener(new MyTextWatcher(text_location));
         text_description.addTextChangedListener(new MyTextWatcher(text_description));
-        text_new_phone.addTextChangedListener(new MyTextWatcher(text_new_phone));
+        //text_new_phone.addTextChangedListener(new MyTextWatcher(text_new_phone));
+        autoCompleteTextView.addTextChangedListener(new MyTextWatcher(autoCompleteTextView));
+
+        //local_code.setText(AppSettings.UA_PHONE_CODE);
+
+        /*ArrayAdapter<Sim> simArrayAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, sims);
+        autoCompleteTextView.setAdapter(simArrayAdapter);*/
     }
 
     private void initTextField(Device device) {
@@ -88,13 +145,22 @@ public class AddDeviceActivity extends AppCompatActivity {
         text_name = (EditText) findViewById(R.id.name_text);
         text_location = (EditText) findViewById(R.id.location_text);
         text_description = (EditText) findViewById(R.id.description_text);
-        text_new_phone = (EditText) findViewById(R.id.new_phone_text);
+        //text_new_phone = (EditText) findViewById(R.id.new_phone_text);
+        autoCompleteTextView = (AutoCompleteTextView) findViewById(autoComplete_SimNum);
+        //listView_autocomplete = (ListView) findViewById(R.id.listView_autocomplete);
 
         text_id.addTextChangedListener(new MyTextWatcher(text_id));
         text_name.addTextChangedListener(new MyTextWatcher(text_name));
         text_location.addTextChangedListener(new MyTextWatcher(text_location));
         text_description.addTextChangedListener(new MyTextWatcher(text_description));
-        text_new_phone.addTextChangedListener(new MyTextWatcher(text_new_phone));
+        //text_new_phone.addTextChangedListener(new MyTextWatcher(text_new_phone));
+        autoCompleteTextView.addTextChangedListener(new MyTextWatcher(autoCompleteTextView));
+        //local_code = (TextView) findViewById(R.id.label_local_code);
+
+        //local_code.setText(AppSettings.UA_PHONE_CODE);
+
+        /*ArrayAdapter<Sim> simArrayAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, sims);
+        autoCompleteTextView.setAdapter(simArrayAdapter);*/
 
         text_id.setText(String.valueOf(device.getDevice_id()));
         text_name.setText(device.getDevice_name());
@@ -102,12 +168,20 @@ public class AddDeviceActivity extends AppCompatActivity {
         text_description.setText("Test Description");
 
         if (device.getSims().size() > 0) {
-            text_new_phone.setText(device.getSims().get(device.getSims().size()-1).getSim_num());
+            //text_new_phone.setText(device.getSims().get(device.getSims().size()-1).getSim_num());
+            autoCompleteTextView.setText(device.getSims().get(device.getSims().size()-1).getSim_num());
         }else {
-            text_new_phone.setText("No sim");
+            //text_new_phone.setText("No sim");
+            //autoCompleteTextView.setText("No sim");
         }
 
         this.device = device;
+    }
+
+    private void initAutoComplete(ArrayList<Sim> sims) {
+        NamesAdapter simArrayAdapter = new NamesAdapter(this, android.R.layout.simple_spinner_dropdown_item, R.id.label_sim, sims);
+        autoCompleteTextView.setAdapter(simArrayAdapter);
+        //autoCompleteTextView.showDropDown();
     }
 
     private void initSpinner() {
@@ -145,6 +219,8 @@ public class AddDeviceActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
 
+                boolean simIsExist = false;
+
                 if (device == null) {
                     device = new Device();
                 }
@@ -169,9 +245,29 @@ public class AddDeviceActivity extends AppCompatActivity {
 
                 if (!validNewPhone()) {
                     return;
-                }else {
+                }else { //если номер уже существует и не установлен установить, если установлена - ошибка, если не существует - создать
+
                     Sim sim = new Sim();
-                    sim.setSim_num(MyUtils.numFilter(text_new_phone.getText().toString()));
+
+                    //boolean simIsExist = false;
+
+                    for (Sim elem : sims) {
+                        if (elem.getSim_num().equals(autoCompleteTextView.getText().toString())) {
+                            if (elem.getDevice_id() > 0) {
+                                Toast toast = Toast.makeText(getApplicationContext(), elem.getSim_num() + " - Этот номер уже используется", Toast.LENGTH_SHORT);
+                                toast.show();
+                                return;
+                            }else {
+                                sim = elem;
+                            }
+                            simIsExist = true;
+                            break;
+                        }
+                    }
+
+                    if (!simIsExist) {
+                        sim.setSim_num(MyUtils.phoneFormatter(MyUtils.numFilter(autoCompleteTextView.getText().toString())));
+                    }
 
                     SimHistory simHistory = new SimHistory();
                     simHistory.setDate_install(MyUtils.currentDate());
@@ -185,9 +281,9 @@ public class AddDeviceActivity extends AppCompatActivity {
                 device.setStaff_id(list.get(spinner_staff.getSelectedItemPosition()).getStaff_id());
 
                 if (device.getId() == 0) {
-                    deviceDaoImpl.addDevice(device);
+                    deviceDaoImpl.addDevice(device, simIsExist);
                 }else {
-                    deviceDaoImpl.updateDevice(device);
+                    deviceDaoImpl.updateDevice(device, simIsExist);
                 }
 
                 Intent intent = new Intent(getApplicationContext(), MainActivity.class);
@@ -221,6 +317,8 @@ public class AddDeviceActivity extends AppCompatActivity {
             switch (view.getId()) {
                 case R.id.id_text:
                     validId();
+                    //Toast toast = Toast.makeText(getApplicationContext(), s, Toast.LENGTH_SHORT);
+                    //toast.show();
                     break;
                 case R.id.name_text:
                     validName();
@@ -231,8 +329,29 @@ public class AddDeviceActivity extends AppCompatActivity {
                 case R.id.description_text:
                     validDescription();
                     break;
-                case R.id.new_phone_text:
+                /*case R.id.new_phone_text:
                     validNewPhone();
+                    break;*/
+                case autoComplete_SimNum:
+
+                    validNewPhone();
+
+                    ArrayList<Sim> list = new ArrayList<>();
+                    String str = s.toString().replaceFirst("^0*", "");
+
+                    if (!s.toString().equals("")) {
+                        for (Sim elem : sims) {
+                            if (elem.getSim_num().contains(str)) {
+                                list.add(elem);
+
+                                //Toast toast = Toast.makeText(getApplicationContext(), elem.getSim_num(), Toast.LENGTH_SHORT);
+                                //toast.show();
+                            }
+                        }
+                    }
+
+                    initAutoComplete(list);
+
                     break;
             }
         }
@@ -291,9 +410,9 @@ public class AddDeviceActivity extends AppCompatActivity {
     }
 
     private boolean validNewPhone() {
-        if (text_new_phone.getText().toString().trim().isEmpty() && text_new_phone.getText().toString().trim().toCharArray().length < MIN_PHONE_LENGTH || text_new_phone.getText().toString().trim().toCharArray().length > MAX_PHONE_LENGTH) {
+        if (autoCompleteTextView.getText().toString().trim().isEmpty() && autoCompleteTextView.getText().toString().trim().toCharArray().length < MIN_PHONE_LENGTH || autoCompleteTextView.getText().toString().trim().toCharArray().length > MAX_PHONE_LENGTH) {
             layout_new_phone.setError(getString(R.string.err_incorrect_phone));
-            requestFocus(text_new_phone);
+            requestFocus(autoCompleteTextView);
             return false;
         }else {
             layout_new_phone.setErrorEnabled(false);
@@ -307,4 +426,168 @@ public class AddDeviceActivity extends AppCompatActivity {
             getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
         }
     }
+
+    private class AsyncDao extends AsyncTask<Void, Void, ArrayList<Sim>> {
+
+        @Override
+        protected ArrayList<Sim> doInBackground(Void... params) {
+            return simDao.getSims();
+        }
+
+        @Override
+        protected void onPostExecute(ArrayList<Sim> sims) {
+            super.onPostExecute(sims);
+            //initAutoComplete();
+        }
+    }
+
+    public class NamesAdapter extends ArrayAdapter<Sim> {
+
+        private List<Sim> items, suggestions, tempItems;
+        private Context context;
+        //private int resource, textViewResourceId;
+
+        public NamesAdapter(Context context, int resource, int textViewResourceId, List<Sim> items) {
+            super(context, resource, textViewResourceId, items);
+            this.context = context;
+            //this.resource = resource;
+            //this.textViewResourceId = textViewResourceId;
+            this.items = items;
+            this.suggestions = new ArrayList<Sim>();
+            tempItems = new ArrayList<Sim>(items);
+        }
+
+        @Override
+        public Filter getFilter() {
+            return myFilter;
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            View view = convertView;
+            if (convertView == null) {
+                LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                view = inflater.inflate(R.layout.autocomplete_item, parent, false);
+            }
+
+            Sim sim = items.get(position);
+
+            if (sim != null) {
+                TextView label_sim = (TextView) view.findViewById(R.id.label_sim);
+                if (label_sim != null)
+                    label_sim.setText(sim.getSim_num());
+            }
+            return view;
+        }
+
+        Filter myFilter = new Filter() {
+            @Override
+            protected FilterResults performFiltering(CharSequence constraint) {
+
+                if (constraint != null) {
+                    suggestions.clear();
+                    for (Sim sim : tempItems) {
+                        if (sim.getSim_num().contains(constraint.toString())) {
+                            suggestions.add(sim);
+                        }
+                    }
+                    FilterResults filterResults = new FilterResults();
+                    filterResults.values = suggestions;
+                    filterResults.count = suggestions.size();
+                    return filterResults;
+                } else {
+                    return new FilterResults();
+                }
+            }
+
+            @Override
+            protected void publishResults(CharSequence constraint, FilterResults results) {
+                List<Sim> filterList = (ArrayList<Sim>) results.values;
+                if (results != null && results.count > 0) {
+                    clear();
+                    for (Sim sim : filterList) {
+                        add(sim);
+                        notifyDataSetChanged();
+                    }
+                }
+            }
+        };
+    }
+
+    /*public class NamesAdapter extends ArrayAdapter<Sim> {
+        Context context;
+        int resource, textViewResourceId;
+        List<Sim> items, tempItems, suggestions;
+
+        public NamesAdapter(Context context, int resource, int textViewResourceId, List<Sim> items) {
+            super(context, resource, textViewResourceId, items);
+            this.context = context;
+            this.resource = resource;
+            this.textViewResourceId = textViewResourceId;
+            this.items = items;
+            tempItems = new ArrayList<Sim>(items); // this makes the difference.
+            suggestions = new ArrayList<Sim>();
+        }
+        @NonNull
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            View view = convertView;
+            if (convertView == null) {
+                LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                view = inflater.inflate(R.layout.autocomplete_item, parent, false);
+            }
+
+            Names names = items.get(position);
+
+            if (names != null) {
+                TextView lblName = (TextView) view.findViewById(R.id.lbl_name);
+                if (lblName != null)
+                    lblName.setText(names.name);
+            }
+            return view;
+        }
+
+        @Override
+        public Filter getFilter() {
+            return nameFilter;
+        }
+
+        Filter nameFilter = new Filter() {
+
+                    @Override
+                    public CharSequence convertResultToString(Object resultValue) {
+                        String str = ((Names) resultValue).name;
+                        return str;
+                    }
+
+                    @Override
+                    protected FilterResults performFiltering(CharSequence constraint) {
+                        if (constraint != null) {
+                            suggestions.clear();
+                            for (Names names : tempItems) {
+                                if (names.name.toLowerCase().contains(constraint.toString().toLowerCase())) {
+                                    suggestions.add(names);
+                                }
+                            }
+                            FilterResults filterResults = new FilterResults();
+                            filterResults.values = suggestions;
+                            filterResults.count = suggestions.size();
+                            return filterResults;
+                        } else {
+                            return new FilterResults();
+                        }
+                    }
+
+                    @Override
+                    protected void publishResults(CharSequence constraint, FilterResults results) {
+                        List<Names> filterList = (ArrayList<Names>) results.values;
+                        if (results != null && results.count > 0) {
+                            clear();
+                            for (Names names : filterList) {
+                                add(names);
+                                notifyDataSetChanged();
+                            }
+                        }
+                    }
+            };}*/
 }

@@ -30,9 +30,11 @@ public interface SimDAO extends DAO {
 
     void addSim(Sim sim);
 
-    void updateSim(Sim sim);
+    void updateSimWithSimHistory(Sim sim, int id_device);
 
-    void updateSimWithHistoryBiDeviceId(Device device);
+    void uninstallSimWithHistoryByDeviceId(Device device);
+
+    void installSimWithHistoryByDeviceId(Device device);
 
     void deleteSim(Sim sim);
 }
